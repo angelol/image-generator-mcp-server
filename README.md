@@ -30,6 +30,20 @@ This is a Model Context Protocol (MCP) server that brings OpenAI's DALL-E 3 imag
 - **Automatic Directory Creation**: Directories are created if they don't exist
 - **Smart File Extension Handling**: `.png` extension is added automatically
 
+## 🔄 Cross-Platform Compatibility
+
+Since this is an MCP (Model Context Protocol) server, it's compatible with **any application that supports the MCP protocol**, not just Cursor!
+
+### Compatible Applications
+
+- **[Cursor](https://cursor.sh/)**: AI-powered code editor
+- **[Claude Desktop](https://claude.ai/desktop)**: Anthropic's standalone Claude application
+- **[Windsurf](https://www.windsurf.ai/)**: AI-powered browser
+- **[Cline](https://cline.tools/)**: Command-line AI interface
+- **Any other MCP-compatible application**
+
+Simply follow the installation instructions for your specific platform, and the image generation capabilities will be available in any MCP-supporting tool you use!
+
 ## 📋 Requirements
 
 - Node.js 18 or higher
@@ -62,6 +76,43 @@ Create a `.env` file in the project root:
 ```
 OPENAI_API_KEY=your_openai_api_key_here
 ```
+
+### Platform-Specific Setup
+
+#### Cursor
+
+No additional configuration needed after running `npm link`. Just restart Cursor, and the tool will be available.
+
+#### Claude Desktop
+
+Add the server configuration to Claude Desktop's config file:
+
+**MacOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
+**Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "image-generator": {
+      "command": "image-generator",
+      "env": {
+        "OPENAI_API_KEY": "your_openai_api_key_here"
+      }
+    }
+  }
+}
+```
+
+#### Other MCP Applications
+
+Most MCP-compatible applications have a similar configuration process:
+
+1. Install and link the package globally: `npm link`
+2. Configure the application to recognize the `image-generator` command
+3. Set the OPENAI_API_KEY environment variable
+4. Restart the application
+
+Consult your specific application's documentation for detailed MCP server integration steps.
 
 ### Usage in Cursor
 
