@@ -78,3 +78,5 @@ npm run inspector
 ```
 
 The Inspector will provide a URL to access debugging tools in your browser.
+
+> **⚠️ Warning**: The Inspector currently has a timeout of 10 seconds. Since image generation often takes longer than this, the inspector may show timeout errors when testing the `generate_image` tool. For now, it's best to test directly in Cursor after rebuilding and restarting.
