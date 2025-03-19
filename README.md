@@ -1,6 +1,6 @@
 # image-generator MCP Server
 
-An mcp server that generates images based on image prompts
+An MCP server that generates images based on text prompts
 
 This is a TypeScript-based MCP server that implements image generation using **OPENAI**'s `dall-e-3` image generation model.
 
@@ -8,10 +8,22 @@ This is a TypeScript-based MCP server that implements image generation using **O
 
 ### Tools
 - `generate_image` - Generate an image for given prompt
-  - Takes `prompt` as a required parameter
-  - Takes `imageName` as a required parameter to save the generated image in a `generated-images` directory on your desktop
+  - Takes `prompt` as a required parameter - The text description of the image to generate
+  - Takes `outputPath` as a required parameter - The absolute path where to save the generated image
+  - Directories will be created automatically if they don't exist
+  - The `.png` extension is added automatically if not included in the path
 
-## Development
+## Setup
+
+### Environment Variables
+
+Create a `.env` file in the project root with your OpenAI API key:
+
+```
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+### Development
 
 Install dependencies:
 ```bash
@@ -23,29 +35,39 @@ Build the server:
 npm run build
 ```
 
+Link the package for local use:
+```bash
+npm link
+```
+
 For development with auto-rebuild:
 ```bash
 npm run watch
 ```
 
+**Important**: After making changes to the server, you must:
+1. Rebuild with `npm run build`
+2. Run `npm link` again
+3. Restart Cursor completely for changes to take effect
+
 ## Installation
 
-To use with Claude Desktop, add the server config:
+To use with Cursor, the server must be linked globally:
 
-On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
-
-```json
-{
-  "mcpServers": {
-    "command": "image-generator",
-      "env": {
-        "OPENAI_API_KEY": "<your-openai-api-key>"
-    }
-  }
-}
+```bash
+npm link
 ```
-Make sure to replace `<your-openai-api-key>` with your actual **OPENAI** Api Key.
+
+### Using with Cursor
+
+Cursor will automatically detect the MCP server after linking. You can test functionality with:
+
+```javascript
+mcp_dalle_generate_image({
+  prompt: "A beautiful mountain landscape", 
+  outputPath: "/Users/yourusername/Pictures/generated_images/mountains"
+})
+```
 
 ### Debugging
 
