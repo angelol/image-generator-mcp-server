@@ -1,4 +1,4 @@
-# DALL-E Image Generator for MCP Applications
+# DALL-E Image Generator MCP Server
 
 <div align="center">
 
@@ -8,7 +8,7 @@
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-blue.svg)](https://www.typescriptlang.org/)
 [![OpenAI](https://img.shields.io/badge/OpenAI-DALL--E%203-green.svg)](https://openai.com/)
-[![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-purple.svg)](https://github.com/modelcontextprotocol/spec)
+[![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-purple.svg)](https://spec.modelcontextprotocol.io/specification/2024-11-05/)
 
 </div>
 
@@ -36,10 +36,10 @@ Since this is an MCP (Model Context Protocol) server, it's compatible with **any
 
 ### Compatible Applications
 
-- **[Cursor](https://cursor.sh/)**: AI-powered code editor
-- **[Claude Desktop](https://claude.ai/desktop)**: Anthropic's standalone Claude application
-- **[Windsurf](https://www.windsurf.ai/)**: AI-powered browser
-- **[Cline](https://cline.tools/)**: Command-line AI interface
+- **[Cursor](https://www.cursor.com/)**: AI-powered code editor built on VS Code that features code generation, multi-file editing, codebase understanding, and chat interface
+- **[Claude Desktop](https://claude.ai/download)**: Anthropic's standalone Claude application
+- **[Windsurf](https://codeium.com/windsurf)**: AI-powered integrated development environment (IDE) by Codeium
+- **[Cline](https://cline.bot)**: AI-powered coding assistant that integrates with IDEs as an autonomous agent
 - **Any other MCP-compatible application**
 
 Simply follow the installation instructions for your specific platform, and the image generation capabilities will be available in any MCP-supporting tool you use!
@@ -48,11 +48,22 @@ Simply follow the installation instructions for your specific platform, and the 
 
 - Node.js 18 or higher
 - An OpenAI API key with DALL-E access
-- Cursor editor
 
 ## 🚀 Quick Start
 
 ### Installation
+
+#### Option 1: Install from npm (Recommended)
+
+```bash
+# Install globally
+npm install -g @singularity2045/image-generator-mcp-server
+
+# Verify installation
+image-generator --version
+```
+
+#### Option 2: Install from Source
 
 ```bash
 # Clone the repository
@@ -65,7 +76,7 @@ npm install
 # Build the project
 npm run build
 
-# Link globally for Cursor to detect
+# Link globally
 npm link
 ```
 
@@ -81,7 +92,25 @@ OPENAI_API_KEY=your_openai_api_key_here
 
 #### Cursor
 
-No additional configuration needed after running `npm link`. Just restart Cursor, and the tool will be available.
+Add the server configuration to Cursor's config file:
+
+**MacOS/Linux**: `~/.cursor/mcp.json`  
+**Windows**: `%USERPROFILE%\.cursor\mcp.json`
+
+```json
+{
+  "mcpServers": {
+    "dalle": {
+      "command": "image-generator",
+      "env": {
+        "OPENAI_API_KEY": "your_openai_api_key_here"
+      }
+    }
+  }
+}
+```
+
+After configuration, restart Cursor for the tool to be available.
 
 #### Claude Desktop
 
@@ -103,29 +132,22 @@ Add the server configuration to Claude Desktop's config file:
 }
 ```
 
+After configuration, restart Claude Desktop for the tool to be available.
+
 #### Other MCP Applications
 
 Most MCP-compatible applications have a similar configuration process:
 
-1. Install and link the package globally: `npm link`
+1. Install and link the package globally as mentioned above
 2. Configure the application to recognize the `image-generator` command
 3. Set the OPENAI_API_KEY environment variable
 4. Restart the application
 
 Consult your specific application's documentation for detailed MCP server integration steps.
 
-### Usage in Cursor
-
-Restart Cursor after installation, then use:
-
-```javascript
-mcp_dalle_generate_image({
-  prompt: "A beautiful mountain landscape with a lake reflecting the sunset", 
-  outputPath: "/Users/yourusername/Pictures/generated_images/landscape"
-})
-```
-
 ### Using with Cursor Agent
+
+Restart Cursor after installation, then it can be used by the Cursor Agent.
 
 Cursor's AI assistant can be instructed to generate images for your projects through natural language prompts. This is especially powerful when building websites, creating assets, or designing UI elements.
 
@@ -180,7 +202,11 @@ During development, you can quickly iterate by asking the Cursor agent to modify
 
 ### Tool Reference
 
-#### `mcp_dalle_generate_image`
+#### Function Naming
+
+The function name will vary depending on how you've configured the MCP server in each application. The examples in this documentation use `mcp_dalle_generate_image`, but your specific configuration might result in a different function name.
+
+#### `generate_image`
 
 Generates an image based on a text prompt.
 

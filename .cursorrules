@@ -1,4 +1,4 @@
-# Cursor Rules for image-generator-mcp-server
+# AI Agent Instructions for image-generator-mcp-server in Cursor
 
 ## MCP Server Workflow
 
@@ -34,3 +34,37 @@ mcp_dalle_generate_image({
 - Images are saved to the exact path specified in `outputPath`
 - Directory structures are created automatically if they don't exist
 - The `.png` extension is added automatically if not included in the path 
+
+### 📦 Publishing to npm
+
+When ready to publish or update the package on npm:
+
+1. Ensure all changes are committed to Git: 
+   ```
+   git add .
+   git commit -m "Your descriptive commit message"
+   ```
+
+2. Update the version number (following semantic versioning):
+   ```
+   npm version patch  # For bug fixes
+   npm version minor  # For new features
+   npm version major  # For breaking changes
+   ```
+
+3. Build the project:
+   ```
+   npm run build
+   ```
+
+4. Publish to npm:
+   ```
+   npm publish
+   ```
+
+5. For first-time publishing with a scoped package:
+   ```
+   npm publish --access public
+   ```
+
+> ⚠️ **Important**: Only publish when explicitly instructed to do so, and after thorough testing. 
