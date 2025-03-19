@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![DALL-E Image Generator Logo](./logo.png)
+<img src="./logo.png" alt="DALL-E Image Generator Logo" width="200"/>
 
 **Generate beautiful AI images using DALL-E 3 directly in your Cursor editor**
 
