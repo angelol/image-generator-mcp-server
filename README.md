@@ -74,6 +74,57 @@ mcp_dalle_generate_image({
 })
 ```
 
+### Using with Cursor Agent
+
+Cursor's AI assistant can be instructed to generate images for your projects through natural language prompts. This is especially powerful when building websites, creating assets, or designing UI elements.
+
+#### Example Workflow
+
+1. **Ask the agent to generate an image for your project**:
+
+   ```
+   Create a hero image for my travel website featuring a tropical beach sunset
+   ```
+
+2. **The agent will use the tool with appropriate parameters**:
+
+   ```javascript
+   mcp_dalle_generate_image({
+     prompt: "A stunning tropical beach at sunset with golden light reflecting on gentle waves, palm trees silhouetted against an orange and purple sky, perfect for a travel website hero image",
+     outputPath: "/Users/yourusername/myproject/public/images/hero-sunset"
+   })
+   ```
+
+3. **Use the generated image in your code**:
+   
+   The agent can help you incorporate the image into your project:
+
+   ```html
+   <div class="hero">
+     <img src="/images/hero-sunset.png" alt="Tropical beach sunset" />
+     <h1>Discover Paradise</h1>
+   </div>
+   ```
+
+#### Tips for Effective Image Generation with the Agent
+
+- **Be specific about style**: Mention "photorealistic," "cartoon," "minimalist," etc.
+- **Describe the intended use**: "for a logo," "for a button," "for a background"
+- **Specify dimensions in your prompt**: "create a wide banner image," "create a square profile picture"
+- **Request variations**: Ask the agent to generate multiple versions with slight prompt modifications
+- **Include art direction**: "in the style of Monet," "with vibrant colors," "with a dark, moody atmosphere"
+
+#### Common Use Cases
+
+- **Website Assets**: "Generate icons for my navigation menu with a consistent blue theme"
+- **UI Components**: "Create button backgrounds with a subtle gradient"
+- **Blog Images**: "Generate a featured image for my article about machine learning"
+- **App Mockups**: "Create screen mockups for my fitness tracking app"
+- **Placeholder Content**: "Generate placeholder product images for my e-commerce site"
+- **Marketing Materials**: "Create social media banner images for my product launch"
+
+During development, you can quickly iterate by asking the Cursor agent to modify existing images: "Generate a lighter version of the previous logo" or "Create the same image but in a different style."
+
 ## 📘 Documentation
 
 ### Tool Reference
