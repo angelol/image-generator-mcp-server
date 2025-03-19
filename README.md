@@ -279,7 +279,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - OpenAI for the DALL-E 3 API
 - The Model Context Protocol team for the MCP specification
 - Cursor team for the editor integration
-- [Sammy Lebbie (sammyl720)](https://github.com/sammyl720) for the original [image-generator-mcp-server](https://github.com/sammyl720/image-generator-mcp-server) repository that this project was forked from
+- [Sammy Lebbie (sammyl720)](https://github.com/sammyl720/image-generator-mcp-server) for creating the initial version of this project that provided a starting point for our implementation
+- [Claude](https://claude.ai), the AI assistant from Anthropic, who helped modernize this codebase and create this documentation
 
 ---
 
