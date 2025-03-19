@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![DALL-E Image Generator Logo](https://raw.githubusercontent.com/openai/openai-node/master/resources/logo.svg?sanitize=true)
+![DALL-E Image Generator Logo](./logo.png)
 
 **Generate beautiful AI images using DALL-E 3 directly in your Cursor editor**
 
@@ -16,7 +16,11 @@
 
 This is a Model Context Protocol (MCP) server that brings OpenAI's DALL-E 3 image generation capabilities directly into the Cursor editor. With a simple function call, you can generate high-quality AI images and save them to any location on your filesystem.
 
-![Demo Example](https://i.imgur.com/example.gif)
+> **💡 Fun fact**: The logo for this project was generated using this very tool!
+
+<div align="center">
+<i>Generate your own amazing images with just a few lines of code!</i>
+</div>
 
 ## ✨ Features
 
