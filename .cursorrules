@@ -1,0 +1,36 @@
+# Cursor Rules for image-generator-mcp-server
+
+## MCP Server Workflow
+
+### 🔄 Change-Build-Test Cycle
+
+**MANDATORY WORKFLOW:**
+
+1. Make code changes to the MCP server
+2. Build the project: `npm run build`
+3. Link the package: `npm link`
+4. Ask the user to restart Cursor
+5. **WAIT** for explicit confirmation from the user that they have restarted Cursor
+6. Only AFTER confirmation, proceed with testing
+
+> ⚠️ **Why restarting is critical**: 
+> - Cursor only establishes connections to MCP servers at startup and doesn't automatically reconnect when the underlying binary is updated
+> - Without restarting Cursor, you'll either see "Not connected" errors or the **old code will continue running**
+> - Any changes you've made won't take effect until Cursor is restarted, even if the tools appear to be working
+
+### 🧪 Testing with DALLE Image Generation
+
+Once the user has confirmed Cursor restart, test the MCP server functionality:
+
+```
+mcp_dalle_generate_image({
+  prompt: "A beautiful mountain landscape", 
+  outputPath: "/Users/yourusername/Pictures/generated_images/mountains"
+})
+```
+
+#### Output Details
+
+- Images are saved to the exact path specified in `outputPath`
+- Directory structures are created automatically if they don't exist
+- The `.png` extension is added automatically if not included in the path 

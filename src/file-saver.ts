@@ -1,53 +1,33 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { homedir } from 'os';
 
+/**
+ * Utility class to handle saving files with appropriate error handling
+ */
 export class FileSaver {
-    constructor(private dirPath: string) {
-        if (!fs.existsSync(dirPath)) {
-            fs.mkdirSync(dirPath, { recursive: true });
-        }
-    }
-
-    async saveBase64(filename: string, base64String: string) {
-        const buffer = Buffer.from(base64String, "base64");
-        return this.save(filename, buffer);
+  /**
+   * Save a base64-encoded string as a file
+   * 
+   * @param filePath The absolute path where the file should be saved
+   * @param base64Data The base64-encoded data to save
+   * @param fileExtension The file extension to add if not already present (default: 'png')
+   * @returns The full path where the file was saved
+   */
+  async saveBase64(filePath: string, base64Data: string, fileExtension = 'png'): Promise<string> {
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    // Add extension if needed
+    if (fileExtension && !filePath.toLowerCase().endsWith(`.${fileExtension.toLowerCase()}`)) {
+      filePath = `${filePath}.${fileExtension}`;
     }
     
-    async save(filename: string, content: Buffer | string)
-    {
-        filename = FileSaver.sanitizeFilename(filename);
-        let filePath = path.join(this.dirPath, filename);
-
-        // Check if the file already exists, and rename if necessary
-        if (fs.existsSync(filePath)) {
-            const ext = path.extname(filename); // File extension
-            const baseName = path.basename(filename, ext); // Filename without extension
-            const isoDate = new Date().toISOString().replace(/:/g, '-'); // ISO string, replace ':' to make it filename-safe
-            filePath = path.join(this.dirPath, `${baseName}-${isoDate}${ext}`);
-        }
-
-        await fs.promises.writeFile(filePath, content);
-        return filePath;
-    }
-
-    private static sanitizeFilename(filename: string): string {
-        // Regular expression to match invalid characters for filenames across platforms
-        const invalidCharacters = /[<>:"/\\|?*\x00-\x1F]/g;
+    // Ensure directory exists
+    const directory = path.dirname(filePath);
+    await fs.promises.mkdir(directory, { recursive: true });
     
-        // Replace invalid characters with an empty string and trim trailing periods/spaces
-        const sanitized = filename
-            .replace(invalidCharacters, '') // Remove invalid characters
-            .replace(/\.+$/, '')           // Remove trailing periods
-            .trim();                       // Remove trailing spaces
+    // Write the file
+    await fs.promises.writeFile(filePath, buffer);
     
-        return sanitized;
-    }
-
-    static CreateDesktopFileSaver(directory: string) {
-        directory = FileSaver.sanitizeFilename(directory);
-        const desktopPath = path.join(homedir(), 'Desktop');
-        const dirPath = path.join(desktopPath, directory);
-        return new FileSaver(dirPath);
-    }
+    return filePath;
+  }
 }
