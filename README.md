@@ -1,10 +1,10 @@
-# DALL-E Image Generator for Cursor
+# DALL-E Image Generator for MCP Applications
 
 <div align="center">
 
 <img src="./logo.png" alt="DALL-E Image Generator Logo" width="200"/>
 
-**Generate beautiful AI images using DALL-E 3 directly in your Cursor editor**
+**Generate beautiful AI images using DALL-E 3 in any MCP-compatible application**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-blue.svg)](https://www.typescriptlang.org/)
 [![OpenAI](https://img.shields.io/badge/OpenAI-DALL--E%203-green.svg)](https://openai.com/)
@@ -14,7 +14,7 @@
 
 ## 🌟 Overview
 
-This is a Model Context Protocol (MCP) server that brings OpenAI's DALL-E 3 image generation capabilities directly into the Cursor editor. With a simple function call, you can generate high-quality AI images and save them to any location on your filesystem.
+This is a Model Context Protocol (MCP) server that brings OpenAI's DALL-E 3 image generation capabilities to any MCP-compatible application including Cursor, Claude Desktop, Windsurf, and more. With a simple function call, you can generate high-quality AI images and save them to any location on your filesystem.
 
 > **💡 Fun fact**: The logo for this project was generated using this very tool!
 
