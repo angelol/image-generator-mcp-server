@@ -20,10 +20,15 @@ export interface ImageGenerationRequestParams {
  * @returns Whether the arguments are valid image generation parameters
  */
 export function isValidImageGenerationArgs(args: unknown): args is ImageGenerationRequestParams {
-  return typeof args === "object" &&
-      args !== null &&
-      "prompt" in args &&
-      typeof (args as any).prompt === 'string' &&
-      "outputPath" in args &&
-      typeof (args as any).outputPath === 'string';  
+  if (typeof args !== "object" || args === null) {
+    return false;
+  }
+  
+  const obj = args as Record<string, unknown>;
+  return (
+    "prompt" in obj &&
+    typeof obj.prompt === 'string' &&
+    "outputPath" in obj &&
+    typeof obj.outputPath === 'string'
+  );
 }

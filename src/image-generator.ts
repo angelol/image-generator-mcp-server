@@ -1,7 +1,8 @@
 import OpenAI from "openai";
 import { ImageGenerateParams } from "openai/resources/images.mjs";
 
-const IMAGE_MODEL = "dall-e-3";
+// Force GPT Image model for all generations (no DALL·E fallback)
+const IMAGE_MODEL = "gpt-image-1.5";
 
 export class ImageGenerator {
     private openai: OpenAI;
@@ -14,8 +15,13 @@ export class ImageGenerator {
             model: IMAGE_MODEL,
             prompt,
             size,
-            response_format: 'b64_json'
+            response_format: 'b64_json',
+            // We save with a .png extension; generate PNG to match the file format.
+            output_format: 'png',
         });
+        if (!response.data || !response.data[0] || !response.data[0].b64_json) {
+            throw new Error("Failed to generate image: No image data received");
+        }
         return response.data[0].b64_json;
     }
 }

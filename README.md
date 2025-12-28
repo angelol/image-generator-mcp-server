@@ -1,20 +1,20 @@
-# DALL-E Image Generator MCP Server
+# GPT Image Generator MCP Server
 
 <div align="center">
 
-<img src="./logo.png" alt="DALL-E Image Generator Logo" width="200"/>
+<img src="./logo.png" alt="GPT Image Generator Logo" width="200"/>
 
-**Generate beautiful AI images using DALL-E 3 in any MCP-compatible application**
+**Generate beautiful AI images using GPT Image (gpt-image-1.5) in any MCP-compatible application**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-blue.svg)](https://www.typescriptlang.org/)
-[![OpenAI](https://img.shields.io/badge/OpenAI-DALL--E%203-green.svg)](https://openai.com/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT%20Image%201.5-green.svg)](https://openai.com/)
 [![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-purple.svg)](https://spec.modelcontextprotocol.io/specification/2024-11-05/)
 
 </div>
 
 ## 🌟 Overview
 
-This is a Model Context Protocol (MCP) server that brings OpenAI's DALL-E 3 image generation capabilities to any MCP-compatible application including Cursor, Claude Desktop, Windsurf, and more. With a simple function call, you can generate high-quality AI images and save them to any location on your filesystem.
+This is a Model Context Protocol (MCP) server that brings OpenAI's GPT Image (gpt-image-1.5) generation capabilities to any MCP-compatible application including Cursor, Claude Desktop, Windsurf, and more. With a simple function call, you can generate high-quality AI images and save them to any location on your filesystem.
 
 > **💡 Fun fact**: The logo for this project was generated using this very tool!
 
@@ -24,7 +24,7 @@ This is a Model Context Protocol (MCP) server that brings OpenAI's DALL-E 3 imag
 
 ## ✨ Features
 
-- **Powerful Image Generation**: Uses OpenAI's state-of-the-art DALL-E 3 model
+- **Powerful Image Generation**: Uses OpenAI's state-of-the-art GPT Image model (`gpt-image-1.5`)
 - **Direct Cursor Integration**: Works seamlessly within your editor
 - **Flexible Output Paths**: Save images anywhere on your filesystem
 - **Automatic Directory Creation**: Directories are created if they don't exist
@@ -47,7 +47,7 @@ Simply follow the installation instructions for your specific platform, and the 
 ## 📋 Requirements
 
 - Node.js 18 or higher
-- An OpenAI API key with DALL-E access
+- An OpenAI API key with Image API access
 
 ## 🚀 Quick Start
 
@@ -100,7 +100,7 @@ Add the server configuration to Cursor's config file:
 ```json
 {
   "mcpServers": {
-    "dalle": {
+    "image-generator": {
       "command": "image-generator",
       "env": {
         "OPENAI_API_KEY": "your_openai_api_key_here"
@@ -259,7 +259,7 @@ After making changes:
 image-generator-mcp-server/
 ├── src/
 │   ├── index.ts         # Main server implementation
-│   ├── image-generator.ts # DALL-E API interaction
+│   ├── image-generator.ts # OpenAI Image API interaction
 │   ├── file-saver.ts    # File system operations
 │   └── types.ts         # TypeScript interfaces
 ├── build/               # Compiled JavaScript
@@ -273,7 +273,7 @@ image-generator-mcp-server/
 ### Common Issues
 
 - **"Not connected" errors**: Make sure you've restarted Cursor after building/linking.
-- **Image generation fails**: Check that your OpenAI API key is valid and has DALL-E access.
+- **Image generation fails**: Check that your OpenAI API key is valid and has Image API access.
 - **Permission errors**: Ensure you have write permissions for the target directory.
 
 ### Debugging
@@ -302,7 +302,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- OpenAI for the DALL-E 3 API
+- OpenAI for the Image API
 - The Model Context Protocol team for the MCP specification
 - Cursor team for the editor integration
 - [Sammy Lebbie (sammyl720)](https://github.com/sammyl720/image-generator-mcp-server) for creating the initial version of this project that provided a starting point for our implementation

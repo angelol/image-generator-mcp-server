@@ -150,7 +150,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 📝 Generation details:
 • Prompt: "${prompt}"
-• Model: DALL-E 3
+• Model: gpt-image-1.5
 • Resolution: 1024x1024`
         }
       ]
