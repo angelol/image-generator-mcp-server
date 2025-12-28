@@ -28,7 +28,7 @@ This is a Model Context Protocol (MCP) server that brings OpenAI's GPT Image (gp
 - **Direct Cursor Integration**: Works seamlessly within your editor
 - **Flexible Output Paths**: Save images anywhere on your filesystem
 - **Automatic Directory Creation**: Directories are created if they don't exist
-- **Smart File Extension Handling**: `.png` extension is added automatically
+- **Smart File Extension Handling**: `.webp` extension is added automatically
 
 ## 🔄 Cross-Platform Compatibility
 
@@ -216,6 +216,7 @@ Generates an image based on a text prompt.
 |-----------|------|-------------|----------|
 | `prompt` | string | Text description of the image to generate | Yes |
 | `outputPath` | string | Absolute path where to save the image | Yes |
+| `size` | `"auto" \| "1024x1024" \| "1536x1024" \| "1024x1536"` | Optional output image size for GPT Image (`gpt-image-1.5`). Defaults to `1024x1024`. | No |
 
 **Returns:**
 
@@ -226,7 +227,8 @@ A success message with the saved file path and generation details.
 ```javascript
 mcp_dalle_generate_image({
   prompt: "A futuristic city with flying cars and neon lights", 
-  outputPath: "/Users/yourusername/Pictures/generated_images/future_city"
+  outputPath: "/Users/yourusername/Pictures/generated_images/future_city",
+  size: "1536x1024"
 })
 ```
 

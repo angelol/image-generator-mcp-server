@@ -55,7 +55,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         },
         outputPath: {
           type: "string",
-          description: "The absolute path where to save the image. The directory will be created if it doesn't exist. File extension (.png) will be added automatically if not provided."
+          description: "The absolute path where to save the image. The directory will be created if it doesn't exist. File extension (.webp) will be added automatically if not provided."
+        },
+        size: {
+          type: "string",
+          enum: ["auto", "1024x1024", "1536x1024", "1024x1536"],
+          description: "Optional output image size for GPT Image (gpt-image-1.5). Use 'auto' to let the model choose. Defaults to 1024x1024."
         }
       },
       required: ["prompt", "outputPath"]
@@ -69,7 +74,7 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
     resources: [
       {
         uri: "dalle://images",
-        mimeType: "image/png",
+        mimeType: "image/webp",
         name: "Generated Images",
       },
     ],
@@ -83,7 +88,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       contents: [
         {
           uri: "dalle://images",
-          mimeType: "image/png",
+          mimeType: "image/webp",
           blob: "", // Empty since this is just for listing
         },
       ],
@@ -122,11 +127,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
   
   try {
-    const { prompt, outputPath } = request.params.arguments;
+    const { prompt, outputPath, size } = request.params.arguments;
     
     // Generate the image
     const imageGenerator = new ImageGenerator();
-    const base64Image = await imageGenerator.generateImage(prompt);
+    const base64Image = await imageGenerator.generateImage(prompt, size);
     
     if (!base64Image) {
       throw new Error("Failed to generate image: No image data received");
@@ -137,8 +142,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       ? outputPath 
       : path.resolve(process.cwd(), outputPath);
     
-    // Save the image with .png extension
-    const savedFilePath = await fileSaver.saveBase64(absolutePath, base64Image, 'png');
+    // Save the image with .webp extension
+    const savedFilePath = await fileSaver.saveBase64(absolutePath, base64Image, 'webp');
+
+    const resolution = size ?? "1024x1024";
     
     return {
       content: [
@@ -151,7 +158,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 📝 Generation details:
 • Prompt: "${prompt}"
 • Model: gpt-image-1.5
-• Resolution: 1024x1024`
+• Resolution: ${resolution}
+• Format: webp`
         }
       ]
     };
