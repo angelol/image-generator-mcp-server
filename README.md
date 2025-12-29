@@ -6,7 +6,7 @@
 
 **Generate beautiful AI images using GPT Image (gpt-image-1.5) in any MCP-compatible application**
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-blue.svg)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT%20Image%201.5-green.svg)](https://openai.com/)
 [![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-purple.svg)](https://spec.modelcontextprotocol.io/specification/2024-11-05/)
 
@@ -72,7 +72,7 @@ image-generator --version
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/image-generator-mcp-server.git
+git clone https://github.com/angelol/image-generator-mcp-server.git
 cd image-generator-mcp-server
 
 # Install dependencies
@@ -179,7 +179,7 @@ Cursor's AI assistant can be instructed to generate images for your projects thr
 2. **The agent will use the tool with appropriate parameters**:
 
    ```javascript
-   mcp_dalle_generate_image({
+   mcp_image_generator_generate_image({
      prompt: "A stunning tropical beach at sunset with golden light reflecting on gentle waves, palm trees silhouetted against an orange and purple sky, perfect for a travel website hero image",
      outputPath: "/Users/yourusername/myproject/public/images/hero-sunset"
    })
@@ -242,7 +242,7 @@ This guardrail helps ensure that AI models follow best practices for prompting, 
 
 #### Function Naming
 
-The function name will vary depending on how you've configured the MCP server in each application. The examples in this documentation use `mcp_dalle_generate_image`, but your specific configuration might result in a different function name.
+The function name will vary depending on how you've configured the MCP server in each application. The examples in this documentation use `mcp_image_generator_generate_image`, but your specific configuration might result in a different function name.
 
 #### `generate_image`
 

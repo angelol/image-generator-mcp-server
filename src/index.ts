@@ -1,21 +1,21 @@
 #!/usr/bin/env node
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
   ListResourcesRequestSchema,
   ReadResourceRequestSchema,
   ErrorCode,
-  McpError
-} from "@modelcontextprotocol/sdk/types.js";
+  McpError,
+} from '@modelcontextprotocol/sdk/types.js';
 
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 import * as path from 'path';
-import { isValidImageGenerationArgs, isValidUpscaleArgs, isValidImageEditArgs } from "./types.js";
-import { ImageGenerator } from "./image-generator.js";
-import { FileSaver } from "./file-saver.js";
-import { TopazUpscaler } from "./topaz-upscaler.js";
+import { isValidImageGenerationArgs, isValidUpscaleArgs, isValidImageEditArgs } from './types.js';
+import { ImageGenerator } from './image-generator.js';
+import { FileSaver } from './file-saver.js';
+import { TopazUpscaler } from './topaz-upscaler.js';
 import * as fs from 'fs';
 
 // GPT-Image-1.5 Prompting Guide
@@ -257,16 +257,16 @@ dotenv.config();
 
 // Check for required API key
 if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
-  console.error("[WARNING] Please set a valid OPENAI_API_KEY in the .env file");
-  console.error("[WARNING] The server will run, but image generation will not work");
+  console.error('[WARNING] Please set a valid OPENAI_API_KEY in the .env file');
+  console.error('[WARNING] The server will run, but image generation will not work');
 }
 
 // Check if Topaz upscaling is available
 const topazAvailable = TopazUpscaler.isAvailable();
 if (topazAvailable) {
-  console.error("[INFO] Topaz Labs upscaling is enabled");
+  console.error('[INFO] Topaz Labs upscaling is enabled');
 } else {
-  console.error("[INFO] Topaz Labs upscaling is disabled (set TOPAZ_API_KEY to enable)");
+  console.error('[INFO] Topaz Labs upscaling is disabled (set TOPAZ_API_KEY to enable)');
 }
 
 // Create file saver instance
@@ -277,15 +277,16 @@ let promptingGuideRead = false;
 
 const server = new Server(
   {
-    name: "image-generator",
-    version: "0.1.0"
+    name: 'image-generator',
+    version: '0.2.1',
   },
   {
     capabilities: {
       resources: {},
-      tools: {}
+      tools: {},
     },
-    instructions: "Before generating images, read the prompting guide resource at image-generator://prompting-guide for best practices on crafting effective prompts for gpt-image-1.5."
+    instructions:
+      'Before generating images, read the prompting guide resource at image-generator://prompting-guide for best practices on crafting effective prompts for gpt-image-1.5.',
   }
 );
 
@@ -294,140 +295,151 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   // Base generate_image tool properties
   const generateImageProperties: Record<string, object> = {
     prompt: {
-      type: "string",
-      description: "A prompt detailing what image to generate."
+      type: 'string',
+      description: 'A prompt detailing what image to generate.',
     },
     outputPath: {
-      type: "string",
-      description: "The absolute path where to save the image. The directory will be created if it doesn't exist. File extension (.png) will be added automatically if not provided."
+      type: 'string',
+      description:
+        "The absolute path where to save the image. The directory will be created if it doesn't exist. File extension (.png) will be added automatically if not provided.",
     },
     size: {
-      type: "string",
-      enum: ["auto", "1024x1024", "1536x1024", "1024x1536"],
-      description: "Optional output image size for GPT Image (gpt-image-1.5). Use 'auto' to let the model choose. Defaults to 1024x1024."
-    }
+      type: 'string',
+      enum: ['auto', '1024x1024', '1536x1024', '1024x1536'],
+      description:
+        "Optional output image size for GPT Image (gpt-image-1.5). Use 'auto' to let the model choose. Defaults to 1024x1024.",
+    },
   };
 
   // Add upscale options if Topaz is available
   if (topazAvailable) {
     generateImageProperties.upscaleWidth = {
-      type: "number",
-      description: "Optional: Upscale the generated image to this width in pixels (1-32000). Requires upscaleHeight to also be set."
+      type: 'number',
+      description:
+        'Optional: Upscale the generated image to this width in pixels (1-32000). Requires upscaleHeight to also be set.',
     };
     generateImageProperties.upscaleHeight = {
-      type: "number",
-      description: "Optional: Upscale the generated image to this height in pixels (1-32000). Requires upscaleWidth to also be set."
+      type: 'number',
+      description:
+        'Optional: Upscale the generated image to this height in pixels (1-32000). Requires upscaleWidth to also be set.',
     };
     generateImageProperties.upscaleModel = {
-      type: "string",
-      enum: ["Standard V2", "Low Resolution V2", "High Fidelity V2", "CGI"],
-      description: "Optional: AI model to use for upscaling. Default: High Fidelity V2."
+      type: 'string',
+      enum: ['Standard V2', 'Low Resolution V2', 'High Fidelity V2', 'CGI'],
+      description: 'Optional: AI model to use for upscaling. Default: High Fidelity V2.',
     };
   }
 
   const tools = [
     {
-      name: "generate_image",
+      name: 'generate_image',
       description: topazAvailable
-        ? "Generate an image from a prompt. Optionally upscale to higher resolution using Topaz Labs AI."
-        : "Generate an image from a prompt.",
+        ? 'Generate an image from a prompt. Optionally upscale to higher resolution using Topaz Labs AI.'
+        : 'Generate an image from a prompt.',
       inputSchema: {
-        type: "object",
+        type: 'object',
         properties: generateImageProperties,
-        required: ["prompt", "outputPath"]
-      }
-    }
+        required: ['prompt', 'outputPath'],
+      },
+    },
   ];
 
   // Add upscale_image tool if Topaz is available
   if (topazAvailable) {
     tools.push({
-      name: "upscale_image",
-      description: "Upscale an existing image to higher resolution using Topaz Labs AI.",
+      name: 'upscale_image',
+      description: 'Upscale an existing image to higher resolution using Topaz Labs AI.',
       inputSchema: {
-        type: "object",
+        type: 'object',
         properties: {
           inputPath: {
-            type: "string",
-            description: "The absolute path to the image to upscale."
+            type: 'string',
+            description: 'The absolute path to the image to upscale.',
           },
           outputPath: {
-            type: "string",
-            description: "The absolute path where to save the upscaled image. File extension (.png) will be added automatically if not provided."
+            type: 'string',
+            description:
+              'The absolute path where to save the upscaled image. File extension (.png) will be added automatically if not provided.',
           },
           width: {
-            type: "number",
-            description: "Target width in pixels (1-32000)."
+            type: 'number',
+            description: 'Target width in pixels (1-32000).',
           },
           height: {
-            type: "number",
-            description: "Target height in pixels (1-32000)."
+            type: 'number',
+            description: 'Target height in pixels (1-32000).',
           },
           model: {
-            type: "string",
-            enum: ["Standard V2", "Low Resolution V2", "High Fidelity V2", "CGI"],
-            description: "AI model to use for upscaling. Default: High Fidelity V2."
-          }
+            type: 'string',
+            enum: ['Standard V2', 'Low Resolution V2', 'High Fidelity V2', 'CGI'],
+            description: 'AI model to use for upscaling. Default: High Fidelity V2.',
+          },
         },
-        required: ["inputPath", "outputPath", "width", "height"]
-      }
+        required: ['inputPath', 'outputPath', 'width', 'height'],
+      },
     });
   }
 
   // Build edit_image tool properties
   const editImageProperties: Record<string, object> = {
     inputImages: {
-      type: "array",
-      items: { type: "string" },
-      description: "Array of absolute paths to input images. First image is the base; additional images are references for compositing or style transfer."
+      type: 'array',
+      items: { type: 'string' },
+      description:
+        'Array of absolute paths to input images. First image is the base; additional images are references for compositing or style transfer.',
     },
     prompt: {
-      type: "string",
-      description: "Description of the edit to perform (e.g., 'Remove the background', 'Apply the style from image 2 to image 1', 'Add the logo to the shirt')."
+      type: 'string',
+      description:
+        "Description of the edit to perform (e.g., 'Remove the background', 'Apply the style from image 2 to image 1', 'Add the logo to the shirt').",
     },
     outputPath: {
-      type: "string",
-      description: "The absolute path where to save the edited image. File extension (.png) will be added automatically if not provided."
+      type: 'string',
+      description:
+        'The absolute path where to save the edited image. File extension (.png) will be added automatically if not provided.',
     },
     size: {
-      type: "string",
-      enum: ["auto", "1024x1024", "1536x1024", "1024x1536"],
-      description: "Output image size. Default: auto."
+      type: 'string',
+      enum: ['auto', '1024x1024', '1536x1024', '1024x1536'],
+      description: 'Output image size. Default: auto.',
     },
     background: {
-      type: "string",
-      enum: ["transparent", "opaque", "auto"],
-      description: "Background type. Use 'transparent' for product extraction/background removal. Default: auto."
-    }
+      type: 'string',
+      enum: ['transparent', 'opaque', 'auto'],
+      description:
+        "Background type. Use 'transparent' for product extraction/background removal. Default: auto.",
+    },
   };
 
   // Add upscale options to edit_image if Topaz is available
   if (topazAvailable) {
     editImageProperties.upscaleWidth = {
-      type: "number",
-      description: "Optional: Upscale the edited image to this width in pixels (1-32000). Requires upscaleHeight to also be set."
+      type: 'number',
+      description:
+        'Optional: Upscale the edited image to this width in pixels (1-32000). Requires upscaleHeight to also be set.',
     };
     editImageProperties.upscaleHeight = {
-      type: "number",
-      description: "Optional: Upscale the edited image to this height in pixels (1-32000). Requires upscaleWidth to also be set."
+      type: 'number',
+      description:
+        'Optional: Upscale the edited image to this height in pixels (1-32000). Requires upscaleWidth to also be set.',
     };
     editImageProperties.upscaleModel = {
-      type: "string",
-      enum: ["Standard V2", "Low Resolution V2", "High Fidelity V2", "CGI"],
-      description: "Optional: AI model to use for upscaling. Default: High Fidelity V2."
+      type: 'string',
+      enum: ['Standard V2', 'Low Resolution V2', 'High Fidelity V2', 'CGI'],
+      description: 'Optional: AI model to use for upscaling. Default: High Fidelity V2.',
     };
   }
 
   tools.push({
-    name: "edit_image",
+    name: 'edit_image',
     description: topazAvailable
-      ? "Edit one or more images using a text prompt. Supports style transfer, object removal, compositing, background removal, and more. Optionally upscale the result using Topaz Labs AI."
-      : "Edit one or more images using a text prompt. Supports style transfer, object removal, compositing, background removal, and more.",
+      ? 'Edit one or more images using a text prompt. Supports style transfer, object removal, compositing, background removal, and more. Optionally upscale the result using Topaz Labs AI.'
+      : 'Edit one or more images using a text prompt. Supports style transfer, object removal, compositing, background removal, and more.',
     inputSchema: {
-      type: "object",
+      type: 'object',
       properties: editImageProperties,
-      required: ["inputImages", "prompt", "outputPath"]
-    }
+      required: ['inputImages', 'prompt', 'outputPath'],
+    },
   });
 
   return { tools };
@@ -438,15 +450,15 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
   return {
     resources: [
       {
-        uri: "image-generator://prompting-guide",
-        mimeType: "text/markdown",
-        name: "GPT-Image-1.5 Prompting Guide",
-        description: "Best practices for crafting effective image generation prompts"
+        uri: 'image-generator://prompting-guide',
+        mimeType: 'text/markdown',
+        name: 'GPT-Image-1.5 Prompting Guide',
+        description: 'Best practices for crafting effective image generation prompts',
       },
       {
-        uri: "image-generator://images",
-        mimeType: "image/png",
-        name: "Generated Images",
+        uri: 'image-generator://images',
+        mimeType: 'image/png',
+        name: 'Generated Images',
       },
     ],
   };
@@ -454,30 +466,30 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
 
 // Handle resource read requests
 server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
-  if (request.params.uri === "image-generator://prompting-guide") {
+  if (request.params.uri === 'image-generator://prompting-guide') {
     promptingGuideRead = true;
     return {
       contents: [
         {
-          uri: "image-generator://prompting-guide",
-          mimeType: "text/markdown",
+          uri: 'image-generator://prompting-guide',
+          mimeType: 'text/markdown',
           text: PROMPTING_GUIDE,
         },
       ],
     };
   }
-  if (request.params.uri === "image-generator://images") {
+  if (request.params.uri === 'image-generator://images') {
     return {
       contents: [
         {
-          uri: "image-generator://images",
-          mimeType: "image/png",
-          blob: "", // Empty since this is just for listing
+          uri: 'image-generator://images',
+          mimeType: 'image/png',
+          blob: '', // Empty since this is just for listing
         },
       ],
     };
   }
-  throw new McpError(ErrorCode.InvalidParams, "Resource not found");
+  throw new McpError(ErrorCode.InvalidParams, 'Resource not found');
 });
 
 // Handle tool execution
@@ -485,27 +497,34 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const toolName = request.params.name;
 
   // Handle upscale_image tool
-  if (toolName === "upscale_image") {
+  if (toolName === 'upscale_image') {
     if (!topazAvailable) {
       return {
-        content: [{ type: "text", text: "Error: TOPAZ_API_KEY is not configured. Upscaling is not available." }],
-        isError: true
+        content: [
+          {
+            type: 'text',
+            text: 'Error: TOPAZ_API_KEY is not configured. Upscaling is not available.',
+          },
+        ],
+        isError: true,
       };
     }
 
     if (!isValidUpscaleArgs(request.params.arguments)) {
-      throw new McpError(ErrorCode.InvalidParams, "Invalid upscale arguments");
+      throw new McpError(ErrorCode.InvalidParams, 'Invalid upscale arguments');
     }
 
     try {
       const { inputPath, outputPath, width, height, model } = request.params.arguments;
 
       // Validate input file exists
-      const absoluteInputPath = path.isAbsolute(inputPath) ? inputPath : path.resolve(process.cwd(), inputPath);
+      const absoluteInputPath = path.isAbsolute(inputPath)
+        ? inputPath
+        : path.resolve(process.cwd(), inputPath);
       if (!fs.existsSync(absoluteInputPath)) {
         return {
-          content: [{ type: "text", text: `Error: Input file not found: ${absoluteInputPath}` }],
-          isError: true
+          content: [{ type: 'text', text: `Error: Input file not found: ${absoluteInputPath}` }],
+          isError: true,
         };
       }
 
@@ -519,47 +538,61 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         outputWidth: width,
         outputHeight: height,
         model: model,
-        outputFormat: "png"
+        outputFormat: 'png',
       });
 
       // Save the upscaled image
-      const absoluteOutputPath = path.isAbsolute(outputPath) ? outputPath : path.resolve(process.cwd(), outputPath);
-      const savedFilePath = await fileSaver.saveBase64(absoluteOutputPath, result.data.toString('base64'), 'png');
+      const absoluteOutputPath = path.isAbsolute(outputPath)
+        ? outputPath
+        : path.resolve(process.cwd(), outputPath);
+      const savedFilePath = await fileSaver.saveBase64(
+        absoluteOutputPath,
+        result.data.toString('base64'),
+        'png'
+      );
 
       return {
-        content: [{
-          type: "text",
-          text: `Image upscaled successfully!
+        content: [
+          {
+            type: 'text',
+            text: `Image upscaled successfully!
 
 File saved to: ${savedFilePath}
 
 Upscale details:
 - Target resolution: ${width}x${height}
-- Model: ${model ?? "High Fidelity V2"}
-- Format: png`
-        }]
+- Model: ${model ?? 'High Fidelity V2'}
+- Format: png`,
+          },
+        ],
       };
     } catch (error) {
-      console.error("[Upscale Error]", error);
+      console.error('[Upscale Error]', error);
       return {
-        content: [{ type: "text", text: `Error upscaling image: ${error instanceof Error ? error.message : String(error)}` }],
-        isError: true
+        content: [
+          {
+            type: 'text',
+            text: `Error upscaling image: ${error instanceof Error ? error.message : String(error)}`,
+          },
+        ],
+        isError: true,
       };
     }
   }
 
   // Handle generate_image tool
-  if (toolName === "generate_image") {
+  if (toolName === 'generate_image') {
     if (!isValidImageGenerationArgs(request.params.arguments)) {
-      throw new McpError(ErrorCode.InvalidParams, "Invalid image generation arguments");
+      throw new McpError(ErrorCode.InvalidParams, 'Invalid image generation arguments');
     }
 
     // Check if prompting guide has been read
     if (!promptingGuideRead) {
       return {
-        content: [{
-          type: "text",
-          text: `Error: Please read the prompting guide first to learn best practices for crafting effective prompts.
+        content: [
+          {
+            type: 'text',
+            text: `Error: Please read the prompting guide first to learn best practices for crafting effective prompts.
 
 You can read it by fetching the resource at: image-generator://prompting-guide
 
@@ -567,22 +600,29 @@ Here is the guide content for convenience:
 
 ${PROMPTING_GUIDE}
 
-Please retry your request after reviewing the guide.`
-        }],
-        isError: true
+Please retry your request after reviewing the guide.`,
+          },
+        ],
+        isError: true,
       };
     }
 
     // Check for API key before processing
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
       return {
-        content: [{ type: "text", text: "Error: Missing or invalid OPENAI_API_KEY in .env file. Please add a valid API key." }],
-        isError: true
+        content: [
+          {
+            type: 'text',
+            text: 'Error: Missing or invalid OPENAI_API_KEY in .env file. Please add a valid API key.',
+          },
+        ],
+        isError: true,
       };
     }
 
     try {
-      const { prompt, outputPath, size, upscaleWidth, upscaleHeight, upscaleModel } = request.params.arguments;
+      const { prompt, outputPath, size, upscaleWidth, upscaleHeight, upscaleModel } =
+        request.params.arguments;
 
       const willUpscale = upscaleWidth && upscaleHeight && topazAvailable;
 
@@ -591,41 +631,48 @@ Please retry your request after reviewing the guide.`
       const base64Image = await imageGenerator.generateImage(prompt, size, 'png');
 
       if (!base64Image) {
-        throw new Error("Failed to generate image: No image data received");
+        throw new Error('Failed to generate image: No image data received');
       }
 
       // Use the absolute path directly - ensure it's absolute
-      const absolutePath = path.isAbsolute(outputPath) ? outputPath : path.resolve(process.cwd(), outputPath);
+      const absolutePath = path.isAbsolute(outputPath)
+        ? outputPath
+        : path.resolve(process.cwd(), outputPath);
 
       // Save the image
       let savedFilePath = await fileSaver.saveBase64(absolutePath, base64Image, 'png');
 
-      const resolution = size ?? "1024x1024";
-      let upscaleInfo = "";
+      const resolution = size ?? '1024x1024';
+      let upscaleInfo = '';
 
       // Upscale if requested and Topaz is available
       if (willUpscale) {
         const imageBuffer = Buffer.from(base64Image, 'base64');
         const upscaler = new TopazUpscaler(process.env.TOPAZ_API_KEY!);
-        const effectiveModel = upscaleModel ?? "High Fidelity V2";
+        const effectiveModel = upscaleModel ?? 'High Fidelity V2';
         const result = await upscaler.upscaleImage({
           imageData: imageBuffer,
           outputWidth: upscaleWidth,
           outputHeight: upscaleHeight,
           model: effectiveModel,
-          outputFormat: "png"
+          outputFormat: 'png',
         });
 
         // Overwrite the file with the upscaled version
-        savedFilePath = await fileSaver.saveBase64(absolutePath, result.data.toString('base64'), 'png');
+        savedFilePath = await fileSaver.saveBase64(
+          absolutePath,
+          result.data.toString('base64'),
+          'png'
+        );
         upscaleInfo = `
 - Upscaled to: ${upscaleWidth}x${upscaleHeight} (via Topaz ${effectiveModel})`;
       }
 
       return {
-        content: [{
-          type: "text",
-          text: `Image generated successfully!
+        content: [
+          {
+            type: 'text',
+            text: `Image generated successfully!
 
 File saved to: ${savedFilePath}
 
@@ -633,30 +680,37 @@ Generation details:
 - Prompt: "${prompt}"
 - Model: gpt-image-1.5
 - Original resolution: ${resolution}${upscaleInfo}
-- Format: png`
-        }]
+- Format: png`,
+          },
+        ],
       };
     } catch (error) {
-      console.error("[Image Generation Error]", error);
+      console.error('[Image Generation Error]', error);
       return {
-        content: [{ type: "text", text: `Error generating image: ${error instanceof Error ? error.message : String(error)}` }],
-        isError: true
+        content: [
+          {
+            type: 'text',
+            text: `Error generating image: ${error instanceof Error ? error.message : String(error)}`,
+          },
+        ],
+        isError: true,
       };
     }
   }
 
   // Handle edit_image tool
-  if (toolName === "edit_image") {
+  if (toolName === 'edit_image') {
     if (!isValidImageEditArgs(request.params.arguments)) {
-      throw new McpError(ErrorCode.InvalidParams, "Invalid image edit arguments");
+      throw new McpError(ErrorCode.InvalidParams, 'Invalid image edit arguments');
     }
 
     // Check if prompting guide has been read
     if (!promptingGuideRead) {
       return {
-        content: [{
-          type: "text",
-          text: `Error: Please read the prompting guide first to learn best practices for crafting effective prompts.
+        content: [
+          {
+            type: 'text',
+            text: `Error: Please read the prompting guide first to learn best practices for crafting effective prompts.
 
 You can read it by fetching the resource at: image-generator://prompting-guide
 
@@ -664,31 +718,48 @@ Here is the guide content for convenience:
 
 ${PROMPTING_GUIDE}
 
-Please retry your request after reviewing the guide.`
-        }],
-        isError: true
+Please retry your request after reviewing the guide.`,
+          },
+        ],
+        isError: true,
       };
     }
 
     // Check for API key before processing
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
       return {
-        content: [{ type: "text", text: "Error: Missing or invalid OPENAI_API_KEY in .env file. Please add a valid API key." }],
-        isError: true
+        content: [
+          {
+            type: 'text',
+            text: 'Error: Missing or invalid OPENAI_API_KEY in .env file. Please add a valid API key.',
+          },
+        ],
+        isError: true,
       };
     }
 
     try {
-      const { inputImages, prompt, outputPath, size, background, upscaleWidth, upscaleHeight, upscaleModel } = request.params.arguments;
+      const {
+        inputImages,
+        prompt,
+        outputPath,
+        size,
+        background,
+        upscaleWidth,
+        upscaleHeight,
+        upscaleModel,
+      } = request.params.arguments;
 
       // Validate all input files exist
       const absoluteInputPaths: string[] = [];
       for (const imagePath of inputImages) {
-        const absolutePath = path.isAbsolute(imagePath) ? imagePath : path.resolve(process.cwd(), imagePath);
+        const absolutePath = path.isAbsolute(imagePath)
+          ? imagePath
+          : path.resolve(process.cwd(), imagePath);
         if (!fs.existsSync(absolutePath)) {
           return {
-            content: [{ type: "text", text: `Error: Input file not found: ${absolutePath}` }],
-            isError: true
+            content: [{ type: 'text', text: `Error: Input file not found: ${absolutePath}` }],
+            isError: true,
           };
         }
         absoluteInputPaths.push(absolutePath);
@@ -700,45 +771,52 @@ Please retry your request after reviewing the guide.`
       const imageGenerator = new ImageGenerator();
       const base64Image = await imageGenerator.editImage(absoluteInputPaths, prompt, {
         size,
-        background
+        background,
       });
 
       if (!base64Image) {
-        throw new Error("Failed to edit image: No image data received");
+        throw new Error('Failed to edit image: No image data received');
       }
 
       // Use the absolute path directly - ensure it's absolute
-      const absoluteOutputPath = path.isAbsolute(outputPath) ? outputPath : path.resolve(process.cwd(), outputPath);
+      const absoluteOutputPath = path.isAbsolute(outputPath)
+        ? outputPath
+        : path.resolve(process.cwd(), outputPath);
 
       // Save the image
       let savedFilePath = await fileSaver.saveBase64(absoluteOutputPath, base64Image, 'png');
 
-      const resolution = size ?? "auto";
-      let upscaleInfo = "";
+      const resolution = size ?? 'auto';
+      let upscaleInfo = '';
 
       // Upscale if requested and Topaz is available
       if (willUpscale) {
         const imageBuffer = Buffer.from(base64Image, 'base64');
         const upscaler = new TopazUpscaler(process.env.TOPAZ_API_KEY!);
-        const effectiveModel = upscaleModel ?? "High Fidelity V2";
+        const effectiveModel = upscaleModel ?? 'High Fidelity V2';
         const result = await upscaler.upscaleImage({
           imageData: imageBuffer,
           outputWidth: upscaleWidth,
           outputHeight: upscaleHeight,
           model: effectiveModel,
-          outputFormat: "png"
+          outputFormat: 'png',
         });
 
         // Overwrite the file with the upscaled version
-        savedFilePath = await fileSaver.saveBase64(absoluteOutputPath, result.data.toString('base64'), 'png');
+        savedFilePath = await fileSaver.saveBase64(
+          absoluteOutputPath,
+          result.data.toString('base64'),
+          'png'
+        );
         upscaleInfo = `
 - Upscaled to: ${upscaleWidth}x${upscaleHeight} (via Topaz ${effectiveModel})`;
       }
 
       return {
-        content: [{
-          type: "text",
-          text: `Image edited successfully!
+        content: [
+          {
+            type: 'text',
+            text: `Image edited successfully!
 
 File saved to: ${savedFilePath}
 
@@ -747,14 +825,20 @@ Edit details:
 - Prompt: "${prompt}"
 - Model: gpt-image-1.5
 - Output size: ${resolution}${background ? `\n- Background: ${background}` : ''}${upscaleInfo}
-- Format: png`
-        }]
+- Format: png`,
+          },
+        ],
       };
     } catch (error) {
-      console.error("[Image Edit Error]", error);
+      console.error('[Image Edit Error]', error);
       return {
-        content: [{ type: "text", text: `Error editing image: ${error instanceof Error ? error.message : String(error)}` }],
-        isError: true
+        content: [
+          {
+            type: 'text',
+            text: `Error editing image: ${error instanceof Error ? error.message : String(error)}`,
+          },
+        ],
+        isError: true,
       };
     }
   }
@@ -765,7 +849,7 @@ Edit details:
 async function runServer() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Image Generator MCP server running on stdio");
+  console.error('Image Generator MCP server running on stdio');
 }
 
 runServer().catch(console.error);

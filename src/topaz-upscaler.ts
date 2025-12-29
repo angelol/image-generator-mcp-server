@@ -1,15 +1,15 @@
-import FormData from "form-data";
+import FormData from 'form-data';
 
-const TOPAZ_API_URL = "https://api.topazlabs.com/image/v1/enhance";
+const TOPAZ_API_URL = 'https://api.topazlabs.com/image/v1/enhance';
 
-export type TopazModel = "Standard V2" | "Low Resolution V2" | "High Fidelity V2" | "CGI";
+export type TopazModel = 'Standard V2' | 'Low Resolution V2' | 'High Fidelity V2' | 'CGI';
 
 export interface UpscaleOptions {
   imageData: Buffer;
   outputWidth: number;
   outputHeight: number;
   model?: TopazModel;
-  outputFormat?: "jpeg" | "png";
+  outputFormat?: 'jpeg' | 'png';
 }
 
 export interface UpscaleResult {
@@ -40,8 +40,8 @@ export class TopazUpscaler {
       imageData,
       outputWidth,
       outputHeight,
-      model = "High Fidelity V2",
-      outputFormat = "png",
+      model = 'High Fidelity V2',
+      outputFormat = 'png',
     } = options;
 
     // Validate dimensions
@@ -53,22 +53,22 @@ export class TopazUpscaler {
     }
 
     const form = new FormData();
-    form.append("image", imageData, {
+    form.append('image', imageData, {
       filename: `image.${outputFormat}`,
       contentType: `image/${outputFormat}`,
     });
-    form.append("output_width", outputWidth.toString());
-    form.append("output_height", outputHeight.toString());
-    form.append("model", model);
-    form.append("output_format", outputFormat);
+    form.append('output_width', outputWidth.toString());
+    form.append('output_height', outputHeight.toString());
+    form.append('model', model);
+    form.append('output_format', outputFormat);
 
     const formBuffer = form.getBuffer();
     const formHeaders = form.getHeaders();
 
     const response = await fetch(TOPAZ_API_URL, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "X-API-Key": this.apiKey,
+        'X-API-Key': this.apiKey,
         ...formHeaders,
       },
       // Use type assertion for form-data buffer compatibility with fetch

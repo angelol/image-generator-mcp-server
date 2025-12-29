@@ -1,4 +1,4 @@
-import type { TopazModel } from "./topaz-upscaler.js";
+import type { TopazModel } from './topaz-upscaler.js';
 
 /**
  * Interface for the parameters required to generate an image
@@ -62,40 +62,38 @@ export interface UpscaleImageRequestParams {
 
 /**
  * Type guard to validate if the provided arguments match the ImageGenerationRequestParams interface
- * 
+ *
  * @param args The arguments to validate
  * @returns Whether the arguments are valid image generation parameters
  */
 export function isValidImageGenerationArgs(args: unknown): args is ImageGenerationRequestParams {
-  if (typeof args !== "object" || args === null) {
+  if (typeof args !== 'object' || args === null) {
     return false;
   }
-  
+
   const obj = args as Record<string, unknown>;
   const hasRequiredFields =
-    (
-    "prompt" in obj &&
+    'prompt' in obj &&
     typeof obj.prompt === 'string' &&
-    "outputPath" in obj &&
-    typeof obj.outputPath === 'string'
-    );
+    'outputPath' in obj &&
+    typeof obj.outputPath === 'string';
 
   if (!hasRequiredFields) return false;
 
-  if (!("size" in obj) || typeof obj.size === "undefined") {
+  if (!('size' in obj) || typeof obj.size === 'undefined') {
     return true;
   }
 
-  if (typeof obj.size !== "string") return false;
+  if (typeof obj.size !== 'string') return false;
 
-  if (!["auto", "1024x1024", "1536x1024", "1024x1536"].includes(obj.size)) {
+  if (!['auto', '1024x1024', '1536x1024', '1024x1536'].includes(obj.size)) {
     return false;
   }
 
   // Validate upscale fields if present
-  if ("upscaleWidth" in obj || "upscaleHeight" in obj) {
-    const hasWidth = "upscaleWidth" in obj && typeof obj.upscaleWidth === "number";
-    const hasHeight = "upscaleHeight" in obj && typeof obj.upscaleHeight === "number";
+  if ('upscaleWidth' in obj || 'upscaleHeight' in obj) {
+    const hasWidth = 'upscaleWidth' in obj && typeof obj.upscaleWidth === 'number';
+    const hasHeight = 'upscaleHeight' in obj && typeof obj.upscaleHeight === 'number';
     // Both must be present if either is specified
     if (hasWidth !== hasHeight) {
       return false;
@@ -103,11 +101,11 @@ export function isValidImageGenerationArgs(args: unknown): args is ImageGenerati
   }
 
   // Validate upscaleModel if present
-  if ("upscaleModel" in obj && obj.upscaleModel !== undefined) {
-    if (typeof obj.upscaleModel !== "string") {
+  if ('upscaleModel' in obj && obj.upscaleModel !== undefined) {
+    if (typeof obj.upscaleModel !== 'string') {
       return false;
     }
-    const validModels = ["Standard V2", "Low Resolution V2", "High Fidelity V2", "CGI"];
+    const validModels = ['Standard V2', 'Low Resolution V2', 'High Fidelity V2', 'CGI'];
     if (!validModels.includes(obj.upscaleModel)) {
       return false;
     }
@@ -120,7 +118,7 @@ export function isValidImageGenerationArgs(args: unknown): args is ImageGenerati
  * Type guard to validate if the provided arguments match the UpscaleImageRequestParams interface
  */
 export function isValidUpscaleArgs(args: unknown): args is UpscaleImageRequestParams {
-  if (typeof args !== "object" || args === null) {
+  if (typeof args !== 'object' || args === null) {
     return false;
   }
 
@@ -128,14 +126,14 @@ export function isValidUpscaleArgs(args: unknown): args is UpscaleImageRequestPa
 
   // Check required fields
   if (
-    !("inputPath" in obj) ||
-    typeof obj.inputPath !== "string" ||
-    !("outputPath" in obj) ||
-    typeof obj.outputPath !== "string" ||
-    !("width" in obj) ||
-    typeof obj.width !== "number" ||
-    !("height" in obj) ||
-    typeof obj.height !== "number"
+    !('inputPath' in obj) ||
+    typeof obj.inputPath !== 'string' ||
+    !('outputPath' in obj) ||
+    typeof obj.outputPath !== 'string' ||
+    !('width' in obj) ||
+    typeof obj.width !== 'number' ||
+    !('height' in obj) ||
+    typeof obj.height !== 'number'
   ) {
     return false;
   }
@@ -146,11 +144,11 @@ export function isValidUpscaleArgs(args: unknown): args is UpscaleImageRequestPa
   }
 
   // Validate model if present
-  if ("model" in obj && obj.model !== undefined) {
-    if (typeof obj.model !== "string") {
+  if ('model' in obj && obj.model !== undefined) {
+    if (typeof obj.model !== 'string') {
       return false;
     }
-    const validModels = ["Standard V2", "Low Resolution V2", "High Fidelity V2", "CGI"];
+    const validModels = ['Standard V2', 'Low Resolution V2', 'High Fidelity V2', 'CGI'];
     if (!validModels.includes(obj.model)) {
       return false;
     }
@@ -203,7 +201,7 @@ export interface ImageEditRequestParams {
  * Type guard to validate if the provided arguments match the ImageEditRequestParams interface
  */
 export function isValidImageEditArgs(args: unknown): args is ImageEditRequestParams {
-  if (typeof args !== "object" || args === null) {
+  if (typeof args !== 'object' || args === null) {
     return false;
   }
 
@@ -211,56 +209,65 @@ export function isValidImageEditArgs(args: unknown): args is ImageEditRequestPar
 
   // Check required fields
   if (
-    !("inputImages" in obj) ||
+    !('inputImages' in obj) ||
     !Array.isArray(obj.inputImages) ||
     obj.inputImages.length === 0 ||
-    !obj.inputImages.every((p: unknown) => typeof p === "string")
+    !obj.inputImages.every((p: unknown) => typeof p === 'string')
   ) {
     return false;
   }
 
-  if (!("prompt" in obj) || typeof obj.prompt !== "string") {
+  if (!('prompt' in obj) || typeof obj.prompt !== 'string') {
     return false;
   }
 
-  if (!("outputPath" in obj) || typeof obj.outputPath !== "string") {
+  if (!('outputPath' in obj) || typeof obj.outputPath !== 'string') {
     return false;
   }
 
   // Validate optional enum fields
-  if ("inputFidelity" in obj && obj.inputFidelity !== undefined) {
-    if (typeof obj.inputFidelity !== "string" || !["low", "medium", "high"].includes(obj.inputFidelity)) {
+  if ('inputFidelity' in obj && obj.inputFidelity !== undefined) {
+    if (
+      typeof obj.inputFidelity !== 'string' ||
+      !['low', 'medium', 'high'].includes(obj.inputFidelity)
+    ) {
       return false;
     }
   }
 
-  if ("size" in obj && obj.size !== undefined) {
-    if (typeof obj.size !== "string" || !["auto", "1024x1024", "1536x1024", "1024x1536"].includes(obj.size)) {
+  if ('size' in obj && obj.size !== undefined) {
+    if (
+      typeof obj.size !== 'string' ||
+      !['auto', '1024x1024', '1536x1024', '1024x1536'].includes(obj.size)
+    ) {
       return false;
     }
   }
 
-  if ("background" in obj && obj.background !== undefined) {
-    if (typeof obj.background !== "string" || !["transparent", "opaque", "auto"].includes(obj.background)) {
+  if ('background' in obj && obj.background !== undefined) {
+    if (
+      typeof obj.background !== 'string' ||
+      !['transparent', 'opaque', 'auto'].includes(obj.background)
+    ) {
       return false;
     }
   }
 
   // Validate upscale fields if present
-  if ("upscaleWidth" in obj || "upscaleHeight" in obj) {
-    const hasWidth = "upscaleWidth" in obj && typeof obj.upscaleWidth === "number";
-    const hasHeight = "upscaleHeight" in obj && typeof obj.upscaleHeight === "number";
+  if ('upscaleWidth' in obj || 'upscaleHeight' in obj) {
+    const hasWidth = 'upscaleWidth' in obj && typeof obj.upscaleWidth === 'number';
+    const hasHeight = 'upscaleHeight' in obj && typeof obj.upscaleHeight === 'number';
     if (hasWidth !== hasHeight) {
       return false;
     }
   }
 
   // Validate upscaleModel if present
-  if ("upscaleModel" in obj && obj.upscaleModel !== undefined) {
-    if (typeof obj.upscaleModel !== "string") {
+  if ('upscaleModel' in obj && obj.upscaleModel !== undefined) {
+    if (typeof obj.upscaleModel !== 'string') {
       return false;
     }
-    const validModels = ["Standard V2", "Low Resolution V2", "High Fidelity V2", "CGI"];
+    const validModels = ['Standard V2', 'Low Resolution V2', 'High Fidelity V2', 'CGI'];
     if (!validModels.includes(obj.upscaleModel)) {
       return false;
     }
