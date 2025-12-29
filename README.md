@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="./logo.png" alt="GPT Image Generator Logo" width="200"/>
+<img src="./logo.webp" alt="GPT Image Generator Logo" width="200"/>
 
 **Generate beautiful AI images using GPT Image (gpt-image-1.5) in any MCP-compatible application**
 
