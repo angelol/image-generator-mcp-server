@@ -1,6 +1,6 @@
 {
   "name": "@singularity2045/image-generator-mcp-server",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "An MCP server that generates images using GPT Image (gpt-image-1.5) based on text prompts",
   "type": "module",
   "bin": {
