@@ -25,7 +25,10 @@ This is a Model Context Protocol (MCP) server that brings OpenAI's GPT Image (gp
 ## ✨ Features
 
 - **Powerful Image Generation**: Uses OpenAI's state-of-the-art GPT Image model (`gpt-image-1.5`)
+- **Image Editing**: Edit existing images with text prompts—style transfer, object removal, compositing, and more
 - **AI Upscaling (Optional)**: Upscale images to high resolution using [Topaz Labs Enhance API](https://www.topazlabs.com/api)
+- **Built-in Prompting Guide**: Includes a comprehensive prompting guide resource with best practices
+- **Prompting Guide Guardrail**: Ensures AI models read the prompting guide before generating images
 - **Direct Cursor Integration**: Works seamlessly within your editor
 - **Flexible Output Paths**: Save images anywhere on your filesystem
 - **Automatic Directory Creation**: Directories are created if they don't exist
@@ -214,6 +217,27 @@ During development, you can quickly iterate by asking the Cursor agent to modify
 
 ## 📘 Documentation
 
+### Prompting Guide Resource
+
+The server provides a built-in prompting guide resource at `image-generator://prompting-guide` containing best practices for crafting effective prompts with GPT Image 1.5. This resource covers:
+
+- Prompt structure and composition
+- Specificity and quality cues
+- Text rendering in images
+- Size selection guidelines
+- Use cases for generation and editing
+- Character consistency workflows
+
+#### Prompting Guide Guardrail
+
+To ensure high-quality results, the server enforces that AI models read the prompting guide before using `generate_image` or `edit_image`. If a model attempts to generate or edit an image without first reading the guide:
+
+1. The tool returns an error with `isError: true`
+2. The full prompting guide content is included in the error message
+3. The model can then retry after reviewing the guide
+
+This guardrail helps ensure that AI models follow best practices for prompting, resulting in better image outputs.
+
 ### Tool Reference
 
 #### Function Naming
@@ -233,8 +257,9 @@ Generates an image based on a text prompt. Optionally upscales the result using 
 | `size` | `"auto" \| "1024x1024" \| "1536x1024" \| "1024x1536"` | Output image size for GPT Image. Defaults to `1024x1024`. | No |
 | `upscaleWidth` | number | Target width for upscaling (1-32000 pixels). Requires `upscaleHeight`. | No |
 | `upscaleHeight` | number | Target height for upscaling (1-32000 pixels). Requires `upscaleWidth`. | No |
+| `upscaleModel` | `"Standard V2" \| "Low Resolution V2" \| "High Fidelity V2" \| "CGI"` | AI model for upscaling. Defaults to `High Fidelity V2`. | No |
 
-> **Note**: The `upscaleWidth` and `upscaleHeight` parameters are only available when `TOPAZ_API_KEY` is configured. Upscaling always uses the High Fidelity V2 model for best quality.
+> **Note**: The upscale parameters are only available when `TOPAZ_API_KEY` is configured.
 
 **Returns:**
 
@@ -258,7 +283,54 @@ mcp_image_generator_generate_image({
   outputPath: "/Users/yourusername/Pictures/robot_portrait",
   size: "1024x1024",
   upscaleWidth: 4096,
-  upscaleHeight: 4096
+  upscaleHeight: 4096,
+  upscaleModel: "High Fidelity V2"
+})
+```
+
+---
+
+#### `edit_image`
+
+Edits one or more images using a text prompt. Supports style transfer, object removal, compositing, background removal, and more. Optionally upscales the result using Topaz Labs AI (requires `TOPAZ_API_KEY`).
+
+**Parameters:**
+
+| Parameter | Type | Description | Required |
+|-----------|------|-------------|----------|
+| `inputImages` | string[] | Array of absolute paths to input images. First image is the base; additional images are references for compositing or style transfer. | Yes |
+| `prompt` | string | Description of the edit to perform | Yes |
+| `outputPath` | string | Absolute path where to save the edited image | Yes |
+| `size` | `"auto" \| "1024x1024" \| "1536x1024" \| "1024x1536"` | Output image size. Defaults to `auto`. | No |
+| `background` | `"transparent" \| "opaque" \| "auto"` | Background type. Use `transparent` for product extraction. Defaults to `auto`. | No |
+| `upscaleWidth` | number | Target width for upscaling (1-32000 pixels). Requires `upscaleHeight`. | No |
+| `upscaleHeight` | number | Target height for upscaling (1-32000 pixels). Requires `upscaleWidth`. | No |
+| `upscaleModel` | `"Standard V2" \| "Low Resolution V2" \| "High Fidelity V2" \| "CGI"` | AI model for upscaling. Defaults to `High Fidelity V2`. | No |
+
+> **Note**: The upscale parameters are only available when `TOPAZ_API_KEY` is configured.
+
+**Returns:**
+
+A success message with the saved file path and edit details.
+
+**Example (style transfer):**
+
+```javascript
+mcp_image_generator_edit_image({
+  inputImages: ["/Users/yourusername/Pictures/photo.png", "/Users/yourusername/Pictures/style_reference.png"],
+  prompt: "Apply the artistic style from image 2 to image 1",
+  outputPath: "/Users/yourusername/Pictures/styled_photo"
+})
+```
+
+**Example (background removal):**
+
+```javascript
+mcp_image_generator_edit_image({
+  inputImages: ["/Users/yourusername/Pictures/product.png"],
+  prompt: "Remove the background, keep only the product",
+  outputPath: "/Users/yourusername/Pictures/product_transparent",
+  background: "transparent"
 })
 ```
 
@@ -276,7 +348,7 @@ Upscales an existing image to higher resolution using Topaz Labs AI. Only availa
 | `outputPath` | string | Absolute path where to save the upscaled image | Yes |
 | `width` | number | Target width in pixels (1-32000) | Yes |
 | `height` | number | Target height in pixels (1-32000) | Yes |
-| `model` | `"Standard V2" \| "Low Resolution V2" \| "High Fidelity V2" \| "CGI"` | AI model to use. Defaults to `Standard V2`. | No |
+| `model` | `"Standard V2" \| "Low Resolution V2" \| "High Fidelity V2" \| "CGI"` | AI model to use. Defaults to `High Fidelity V2`. | No |
 
 **Available Models:**
 

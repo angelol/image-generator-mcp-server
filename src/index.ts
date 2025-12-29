@@ -318,6 +318,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       type: "number",
       description: "Optional: Upscale the generated image to this height in pixels (1-32000). Requires upscaleWidth to also be set."
     };
+    generateImageProperties.upscaleModel = {
+      type: "string",
+      enum: ["Standard V2", "Low Resolution V2", "High Fidelity V2", "CGI"],
+      description: "Optional: AI model to use for upscaling. Default: High Fidelity V2."
+    };
   }
 
   const tools = [
@@ -361,7 +366,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           model: {
             type: "string",
             enum: ["Standard V2", "Low Resolution V2", "High Fidelity V2", "CGI"],
-            description: "AI model to use for upscaling. Default: Standard V2."
+            description: "AI model to use for upscaling. Default: High Fidelity V2."
           }
         },
         required: ["inputPath", "outputPath", "width", "height"]
@@ -405,6 +410,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     editImageProperties.upscaleHeight = {
       type: "number",
       description: "Optional: Upscale the edited image to this height in pixels (1-32000). Requires upscaleWidth to also be set."
+    };
+    editImageProperties.upscaleModel = {
+      type: "string",
+      enum: ["Standard V2", "Low Resolution V2", "High Fidelity V2", "CGI"],
+      description: "Optional: AI model to use for upscaling. Default: High Fidelity V2."
     };
   }
 
@@ -525,7 +535,7 @@ File saved to: ${savedFilePath}
 
 Upscale details:
 - Target resolution: ${width}x${height}
-- Model: ${model ?? "Standard V2"}
+- Model: ${model ?? "High Fidelity V2"}
 - Format: png`
         }]
       };
@@ -572,7 +582,7 @@ Please retry your request after reviewing the guide.`
     }
 
     try {
-      const { prompt, outputPath, size, upscaleWidth, upscaleHeight } = request.params.arguments;
+      const { prompt, outputPath, size, upscaleWidth, upscaleHeight, upscaleModel } = request.params.arguments;
 
       const willUpscale = upscaleWidth && upscaleHeight && topazAvailable;
 
@@ -597,18 +607,19 @@ Please retry your request after reviewing the guide.`
       if (willUpscale) {
         const imageBuffer = Buffer.from(base64Image, 'base64');
         const upscaler = new TopazUpscaler(process.env.TOPAZ_API_KEY!);
+        const effectiveModel = upscaleModel ?? "High Fidelity V2";
         const result = await upscaler.upscaleImage({
           imageData: imageBuffer,
           outputWidth: upscaleWidth,
           outputHeight: upscaleHeight,
-          model: "High Fidelity V2",
+          model: effectiveModel,
           outputFormat: "png"
         });
 
         // Overwrite the file with the upscaled version
         savedFilePath = await fileSaver.saveBase64(absolutePath, result.data.toString('base64'), 'png');
         upscaleInfo = `
-- Upscaled to: ${upscaleWidth}x${upscaleHeight} (via Topaz High Fidelity V2)`;
+- Upscaled to: ${upscaleWidth}x${upscaleHeight} (via Topaz ${effectiveModel})`;
       }
 
       return {
@@ -668,7 +679,7 @@ Please retry your request after reviewing the guide.`
     }
 
     try {
-      const { inputImages, prompt, outputPath, size, background, upscaleWidth, upscaleHeight } = request.params.arguments;
+      const { inputImages, prompt, outputPath, size, background, upscaleWidth, upscaleHeight, upscaleModel } = request.params.arguments;
 
       // Validate all input files exist
       const absoluteInputPaths: string[] = [];
@@ -709,18 +720,19 @@ Please retry your request after reviewing the guide.`
       if (willUpscale) {
         const imageBuffer = Buffer.from(base64Image, 'base64');
         const upscaler = new TopazUpscaler(process.env.TOPAZ_API_KEY!);
+        const effectiveModel = upscaleModel ?? "High Fidelity V2";
         const result = await upscaler.upscaleImage({
           imageData: imageBuffer,
           outputWidth: upscaleWidth,
           outputHeight: upscaleHeight,
-          model: "High Fidelity V2",
+          model: effectiveModel,
           outputFormat: "png"
         });
 
         // Overwrite the file with the upscaled version
         savedFilePath = await fileSaver.saveBase64(absoluteOutputPath, result.data.toString('base64'), 'png');
         upscaleInfo = `
-- Upscaled to: ${upscaleWidth}x${upscaleHeight} (via Topaz High Fidelity V2)`;
+- Upscaled to: ${upscaleWidth}x${upscaleHeight} (via Topaz ${effectiveModel})`;
       }
 
       return {

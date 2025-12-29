@@ -40,7 +40,7 @@ export class TopazUpscaler {
       imageData,
       outputWidth,
       outputHeight,
-      model = "Standard V2",
+      model = "High Fidelity V2",
       outputFormat = "png",
     } = options;
 

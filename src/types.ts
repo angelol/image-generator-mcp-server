@@ -32,6 +32,12 @@ export interface ImageGenerationRequestParams {
    * Must be used together with upscaleWidth.
    */
   upscaleHeight?: number;
+
+  /**
+   * Optional: AI model to use for upscaling.
+   * Default: "High Fidelity V2"
+   */
+  upscaleModel?: TopazModel;
 }
 
 /**
@@ -50,7 +56,7 @@ export interface UpscaleImageRequestParams {
   /** Target height in pixels (1-32000) */
   height: number;
 
-  /** AI model to use for upscaling. Default: "Standard V2" */
+  /** AI model to use for upscaling. Default: "High Fidelity V2" */
   model?: TopazModel;
 }
 
@@ -92,6 +98,17 @@ export function isValidImageGenerationArgs(args: unknown): args is ImageGenerati
     const hasHeight = "upscaleHeight" in obj && typeof obj.upscaleHeight === "number";
     // Both must be present if either is specified
     if (hasWidth !== hasHeight) {
+      return false;
+    }
+  }
+
+  // Validate upscaleModel if present
+  if ("upscaleModel" in obj && obj.upscaleModel !== undefined) {
+    if (typeof obj.upscaleModel !== "string") {
+      return false;
+    }
+    const validModels = ["Standard V2", "Low Resolution V2", "High Fidelity V2", "CGI"];
+    if (!validModels.includes(obj.upscaleModel)) {
       return false;
     }
   }
@@ -177,6 +194,9 @@ export interface ImageEditRequestParams {
 
   /** Optional: Upscale height (requires TOPAZ_API_KEY) */
   upscaleHeight?: number;
+
+  /** Optional: AI model to use for upscaling. Default: "High Fidelity V2" */
+  upscaleModel?: TopazModel;
 }
 
 /**
@@ -231,6 +251,17 @@ export function isValidImageEditArgs(args: unknown): args is ImageEditRequestPar
     const hasWidth = "upscaleWidth" in obj && typeof obj.upscaleWidth === "number";
     const hasHeight = "upscaleHeight" in obj && typeof obj.upscaleHeight === "number";
     if (hasWidth !== hasHeight) {
+      return false;
+    }
+  }
+
+  // Validate upscaleModel if present
+  if ("upscaleModel" in obj && obj.upscaleModel !== undefined) {
+    if (typeof obj.upscaleModel !== "string") {
+      return false;
+    }
+    const validModels = ["Standard V2", "Low Resolution V2", "High Fidelity V2", "CGI"];
+    if (!validModels.includes(obj.upscaleModel)) {
       return false;
     }
   }
