@@ -19,6 +19,7 @@ export class ImageGenerator {
             size: effectiveSize,
             // Generate WebP (smaller files, great quality) and save as .webp on disk.
             output_format: 'webp',
+            quality: 'high',
         });
         if (!response.data || !response.data[0] || !response.data[0].b64_json) {
             throw new Error("Failed to generate image: No image data received");
