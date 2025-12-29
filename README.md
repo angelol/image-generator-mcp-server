@@ -25,10 +25,11 @@ This is a Model Context Protocol (MCP) server that brings OpenAI's GPT Image (gp
 ## ✨ Features
 
 - **Powerful Image Generation**: Uses OpenAI's state-of-the-art GPT Image model (`gpt-image-1.5`)
+- **AI Upscaling (Optional)**: Upscale images to high resolution using [Topaz Labs Enhance API](https://www.topazlabs.com/api)
 - **Direct Cursor Integration**: Works seamlessly within your editor
 - **Flexible Output Paths**: Save images anywhere on your filesystem
 - **Automatic Directory Creation**: Directories are created if they don't exist
-- **Smart File Extension Handling**: `.webp` extension is added automatically
+- **Smart File Extension Handling**: `.png` extension is added automatically
 
 ## 🔄 Cross-Platform Compatibility
 
@@ -48,6 +49,7 @@ Simply follow the installation instructions for your specific platform, and the 
 
 - Node.js 18 or higher
 - An OpenAI API key with Image API access
+- (Optional) A Topaz Labs API key for high-resolution upscaling
 
 ## 🚀 Quick Start
 
@@ -86,7 +88,13 @@ Create a `.env` file in the project root:
 
 ```
 OPENAI_API_KEY=your_openai_api_key_here
+TOPAZ_API_KEY=your_topaz_api_key_here  # Optional: enables high-resolution upscaling
 ```
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `OPENAI_API_KEY` | Yes | Your OpenAI API key for image generation |
+| `TOPAZ_API_KEY` | No | Your [Topaz Labs API key](https://www.topazlabs.com/api) for AI upscaling (enables `upscale_image` tool and upscale options in `generate_image`) |
 
 ### Platform-Specific Setup
 
@@ -103,12 +111,15 @@ Add the server configuration to Cursor's config file:
     "image-generator": {
       "command": "image-generator",
       "env": {
-        "OPENAI_API_KEY": "your_openai_api_key_here"
+        "OPENAI_API_KEY": "your_openai_api_key_here",
+        "TOPAZ_API_KEY": "your_topaz_api_key_here"
       }
     }
   }
 }
 ```
+
+> **Note**: The `TOPAZ_API_KEY` is optional. If not provided, image generation will still work, but upscaling features will be disabled.
 
 After configuration, restart Cursor for the tool to be available.
 
@@ -116,7 +127,7 @@ After configuration, restart Cursor for the tool to be available.
 
 Add the server configuration to Claude Desktop's config file:
 
-**MacOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
+**MacOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 **Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
 
 ```json
@@ -125,12 +136,15 @@ Add the server configuration to Claude Desktop's config file:
     "image-generator": {
       "command": "image-generator",
       "env": {
-        "OPENAI_API_KEY": "your_openai_api_key_here"
+        "OPENAI_API_KEY": "your_openai_api_key_here",
+        "TOPAZ_API_KEY": "your_topaz_api_key_here"
       }
     }
   }
 }
 ```
+
+> **Note**: The `TOPAZ_API_KEY` is optional. If not provided, image generation will still work, but upscaling features will be disabled.
 
 After configuration, restart Claude Desktop for the tool to be available.
 
@@ -208,7 +222,7 @@ The function name will vary depending on how you've configured the MCP server in
 
 #### `generate_image`
 
-Generates an image based on a text prompt.
+Generates an image based on a text prompt. Optionally upscales the result using Topaz Labs AI (requires `TOPAZ_API_KEY`).
 
 **Parameters:**
 
@@ -216,19 +230,76 @@ Generates an image based on a text prompt.
 |-----------|------|-------------|----------|
 | `prompt` | string | Text description of the image to generate | Yes |
 | `outputPath` | string | Absolute path where to save the image | Yes |
-| `size` | `"auto" \| "1024x1024" \| "1536x1024" \| "1024x1536"` | Optional output image size for GPT Image (`gpt-image-1.5`). Defaults to `1024x1024`. | No |
+| `size` | `"auto" \| "1024x1024" \| "1536x1024" \| "1024x1536"` | Output image size for GPT Image. Defaults to `1024x1024`. | No |
+| `upscaleWidth` | number | Target width for upscaling (1-32000 pixels). Requires `upscaleHeight`. | No |
+| `upscaleHeight` | number | Target height for upscaling (1-32000 pixels). Requires `upscaleWidth`. | No |
+
+> **Note**: The `upscaleWidth` and `upscaleHeight` parameters are only available when `TOPAZ_API_KEY` is configured. Upscaling always uses the High Fidelity V2 model for best quality.
 
 **Returns:**
 
 A success message with the saved file path and generation details.
 
+**Example (basic):**
+
+```javascript
+mcp_image_generator_generate_image({
+  prompt: "A futuristic city with flying cars and neon lights",
+  outputPath: "/Users/yourusername/Pictures/generated_images/future_city",
+  size: "1536x1024"
+})
+```
+
+**Example (with upscaling):**
+
+```javascript
+mcp_image_generator_generate_image({
+  prompt: "A detailed portrait of a robot",
+  outputPath: "/Users/yourusername/Pictures/robot_portrait",
+  size: "1024x1024",
+  upscaleWidth: 4096,
+  upscaleHeight: 4096
+})
+```
+
+---
+
+#### `upscale_image`
+
+Upscales an existing image to higher resolution using Topaz Labs AI. Only available when `TOPAZ_API_KEY` is configured.
+
+**Parameters:**
+
+| Parameter | Type | Description | Required |
+|-----------|------|-------------|----------|
+| `inputPath` | string | Absolute path to the image to upscale (PNG or JPEG) | Yes |
+| `outputPath` | string | Absolute path where to save the upscaled image | Yes |
+| `width` | number | Target width in pixels (1-32000) | Yes |
+| `height` | number | Target height in pixels (1-32000) | Yes |
+| `model` | `"Standard V2" \| "Low Resolution V2" \| "High Fidelity V2" \| "CGI"` | AI model to use. Defaults to `Standard V2`. | No |
+
+**Available Models:**
+
+| Model | Best For |
+|-------|----------|
+| `Standard V2` | General-purpose upscaling, balances detail and speed |
+| `Low Resolution V2` | Low-resolution images, web graphics, screenshots |
+| `High Fidelity V2` | High-quality images, professional photography |
+| `CGI` | CGI and digital illustrations, computer-generated images |
+
+**Returns:**
+
+A success message with the saved file path and upscale details.
+
 **Example:**
 
 ```javascript
-mcp_dalle_generate_image({
-  prompt: "A futuristic city with flying cars and neon lights", 
-  outputPath: "/Users/yourusername/Pictures/generated_images/future_city",
-  size: "1536x1024"
+mcp_image_generator_upscale_image({
+  inputPath: "/Users/yourusername/Pictures/photo.png",
+  outputPath: "/Users/yourusername/Pictures/photo_4k",
+  width: 3840,
+  height: 2160,
+  model: "High Fidelity V2"
 })
 ```
 
@@ -260,14 +331,15 @@ After making changes:
 ```
 image-generator-mcp-server/
 ├── src/
-│   ├── index.ts         # Main server implementation
+│   ├── index.ts           # Main server implementation
 │   ├── image-generator.ts # OpenAI Image API interaction
-│   ├── file-saver.ts    # File system operations
-│   └── types.ts         # TypeScript interfaces
-├── build/               # Compiled JavaScript
-├── .cursorrules         # Cursor rules for the project
-├── package.json         # Project dependencies
-└── README.md            # This file
+│   ├── topaz-upscaler.ts  # Topaz Labs API integration
+│   ├── file-saver.ts      # File system operations
+│   └── types.ts           # TypeScript interfaces
+├── build/                 # Compiled JavaScript
+├── .cursorrules           # Cursor rules for the project
+├── package.json           # Project dependencies
+└── README.md              # This file
 ```
 
 ## 🐛 Troubleshooting
@@ -305,6 +377,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🙏 Acknowledgments
 
 - OpenAI for the Image API
+- [Topaz Labs](https://www.topazlabs.com/) for the Enhance API for high-quality AI upscaling
 - The Model Context Protocol team for the MCP specification
 - Cursor team for the editor integration
 - [Sammy Lebbie (sammyl720)](https://github.com/sammyl720/image-generator-mcp-server) for creating the initial version of this project that provided a starting point for our implementation
